@@ -1,0 +1,110 @@
+11/30
+ - Setup on Dr. J's Server
+    - ssh michaelzeng@10.10.23.28
+       - Pass: TBSRobotics
+
+ - Goals:
+    - get loss to decrease 75% or more by the last epoch
+    - get validation and training accuracy to create more consisten curves
+ - Things to try:
+    - more epochs (40)
+       - does bring the loss down more than 75%
+       - training accuracy is on a downward trend with lots of fluctuations
+       - test accuracy is basically flat with even more fluctuations
+    - increase batch size (32)
+       - appears to have little to no effect
+    - LR scheduler
+    - augment the data to create more data?
+    
+
+11/18
+ - The loss function drops from around 11.20 to 11.06 over the course of 50 epochs at LR = 0.0000000005
+    - this is like a 2% drop in loss, which is really small
+    - ideally, the loss of the trained model should be less than 10% of the starting loss   (note: the magnitude of loss doesn't matter, just the relative magnitudes of the starting vs ending loss)
+       - at this LR, I either need to run thousands of epochs or I need to increase LR significantly
+          - just by eye, LR of 0.0000000005 is probably wayy too small
+ - switching LR to 0.001
+    - 15 epochs produced really good results
+       - loss reduced from 0.027 to 0.011
+       - predictions at a huge range of ages were all quite accurate
+    - 50 epochs produced similarly good results
+       - loss reduced from 0.027 to 0.0065
+          - pretty consistent loss dropping (exponential curve), occasionally loss would jump back up above epoch 35
+       - not obviously better predictions than 15 epochs
+       - training and testing accuracies are still a mess, but they both appear on a somewhat downward trend
+
+11/12
+ - Got best result so far?
+    - learning_rate = 0.000000001   produced varying predictions in a range between 14 and 31
+    - learning_rate = 0.0000000005  produced varying predictions in a range between -7 and 50 (from the tests I did)
+       - the model appears to be actually trying to predict age; the validation accuracy is consistently much worse than training accuracy
+       - there might be an observable pattern of predicting young ages with really bright/smooth skin
+           - it sometimes predicts really old age for really old/wrinkly skin
+    - learning_rate = 0.00000000025, 50 epochs produced a large range of predictions but all negative, in the dozens
+       - loss was dropping pretty consistently (some spikes)
+    - learning_rate = 0.0000000005,  50 epochs also produced large range of predictions but all in the hundreds, negative
+       - loss was dropping at a very linear, consistent rate
+    - IT APPEARS MORE EPOCHS --> PREDICTIONS ARE ALL NEGATIVE
+
+11/9
+ - implemented code in the training code to measure training accuracy
+ - implemented new idea: make the prediction between 0 and 1, then scale up by 100 afterwards to get the final prediction
+    - ran for 50 epochs, all the predictions are still in a small range, and negative
+       - all the same hyperparameters, but switched epochs to 5, same result
+ - changed LR to be 5x bigger, now predictions are in the hundreds, and the range of predictions is also in the hundreds (but loss still steadily decreases during training)
+
+11/2
+ - investigating why the trained model always predicts the same number
+    - reducing LR to 1*10^-8 stopped this from happening, but all the predictions are still in a small range
+    
+ - next time: plot both train and validation accuracy so I can see if there is overfitting and stuff
+    - make sure the check_accuracy() is reliable/makes sense
+    - add some way to check_accuracy on the test set
+
+10/28
+ - increased learning rate by 5x
+ - running 10 epochs
+ - result: loss is decreasing to a lower value now
+ 
+ - for some reason the trained model always predicts the same number
+    - haven't figured out why yet
+
+10/22
+ - deleted check_accuracy on train set to increase speed
+ - ran 50 epochs
+    - loss is no longer decreasing after ~10 epochs
+
+10/19
+ - decided that predicting age, gender, and race at the same time by having the last dense layer be (3, 1) is not a good idea
+ - began creating separate models for all 3
+     - started on age model
+        - created cell (the last cell) that runs prediction on just a single image
+ - NEXT TIME: create more efficient method of check_accuracy() so it doesn't run the model so many times
+ - NEXT TIME: run more epochs, see if I can increase accuracy
+
+10/12
+ - created a scaling function; makes the age, race, gender values around 1. The goal of this is to make it so age, race, and gender are all weighted the same
+ - the training runs, and loss continually decreases, but the pattern with accuracy is unclear
+ - NEXT TIME: create function that runs just 1 prediction at a time
+ - NEXT TIME: figure out if it's really possible for a NN to train age, race, and gender all at once; is the loss function and back prop really able to do that?
+
+10/1
+ - worked on check_accuracy(). created accuracy score calculation, which is what the function returns (the closer the score is to 0, the better). Began creating accuracy score based on percentage of equal integer-rounded ages/genders/races.
+   - Note: check_accuracy() is just for plotting purposes, but it's not involved in backprop
+ 
+ - while the loss is decreasing, the accuracy score is not decreasing
+    - is the accuracy score and loss calculation similar?
+    - should I create my own loss function? the default loss function might weigh age more highly because the age numbers are much higher
+       - alternative idea: modify scores before feeding it into the loss function
+       
+       
+Epoch: 1, Loss: 121.63338795962663, Train Acc: 1.5040613412857056, Test Acc: 1.5924888849258423
+Epoch: 2, Loss: 80.38052773435442, Train Acc: 2.115525245666504, Test Acc: 3.495532751083374
+Epoch: 3, Loss: 70.2820433959189, Train Acc: 1.7447236776351929, Test Acc: 2.123624563217163
+Epoch: 4, Loss: 63.678908899702876, Train Acc: 1.3761335611343384, Test Acc: 2.218135118484497
+Epoch: 5, Loss: 60.45579176930111, Train Acc: 2.056178092956543, Test Acc: 2.7004010677337646
+Epoch: 6, Loss: 59.953623136420674, Train Acc: 2.13204288482666, Test Acc: 4.795556545257568
+Epoch: 7, Loss: 58.59958621663549, Train Acc: 1.9818731546401978, Test Acc: 3.527841567993164
+Epoch: 8, Loss: 55.71808810981892, Train Acc: 2.165161371231079, Test Acc: 2.9506618976593018
+Epoch: 9, Loss: 54.093290573428895, Train Acc: 1.941288948059082, Test Acc: 2.4518184661865234
+Epoch: 10, Loss: 55.76847094428077, Train Acc: 3.53991961479187, Test Acc: 5.286427974700928
