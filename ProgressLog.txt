@@ -1,7 +1,12 @@
 11/30
  - Setup on Dr. J's Server
-    - ssh michaelzeng@10.10.23.28
-       - Pass: TBSRobotics
+    - Command Line 1:
+        - >ssh michaelzeng@10.10.23.28
+           - Pass: TBSRobotics
+        - >jupyter-notebook --no-browser --port=8888
+    - Command Line 2:
+        - >ssh -N -f -L localhost:8888:localhost:8888 michaelzeng@10.10.23.28
+    
 
  - Goals:
     - get loss to decrease 75% or more by the last epoch
